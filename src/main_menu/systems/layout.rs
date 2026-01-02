@@ -56,6 +56,17 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
             parent
                 .spawn((
                     primary_button_bundle(),
+                    SettingsButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        Text::new("settings".to_string()),
+                        TextColor::from(TextColor::WHITE),
+                    ));
+                });
+            parent
+                .spawn((
+                    primary_button_bundle(),
                     QuitButton,
                 ))
                 .with_children(|parent| {

@@ -3,12 +3,15 @@ use bevy::{prelude::*, window::WindowResolution};
 mod game;
 mod main_menu;
 mod resources;
-mod systems;
+mod settings;
 mod styling;
+mod systems;
 
 use game::GamePlugin;
 use main_menu::MainMenuPlugin;
 use systems::*;
+
+use crate::settings::SettingsPlugin;
 
 fn main() {
     App::new()
@@ -27,12 +30,14 @@ fn main() {
         .add_systems(Update, set_app_state)
         .add_plugins(GamePlugin)
         .add_plugins(MainMenuPlugin)
+        .add_plugins(SettingsPlugin)
         .run();
 }
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum AppState {
     MainMenu,
+    Settings,
     Game,
     GameOver,
     #[default]
