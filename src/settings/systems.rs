@@ -1,71 +1,44 @@
-use bevy::{
-    prelude::*,
-    window::{PrimaryWindow, WindowMode},
-};
+use std::fs;
 
-use crate::{
-    AppState, settings::interactions::{ScreenModeInteraction, SettingsNavigationInteraction}, styling::{PRIMARY_BUTTON_COLOR, PRIMARY_BUTTON_COLOR_HOVERED, PRIMARY_BUTTON_COLOR_PRESSED}
-};
+use bevy::{prelude::*, window::{PrimaryWindow, WindowMode}};
 
-pub fn screen_mode_interaction(
-    mut button_query: Query<
-        (&Interaction, &mut BackgroundColor, &ScreenModeInteraction),
-        (Changed<Interaction>, With<ScreenModeInteraction>),
-    >,
-    mut window_query: Query<&mut Window, With<PrimaryWindow>>,
-) {
-    for (interaction, mut background_color, screen_mode_interaction) in button_query.iter_mut() {
-        match interaction {
-            Interaction::None => {
-                *background_color = PRIMARY_BUTTON_COLOR.into();
-            }
-            Interaction::Hovered => {
-                *background_color = PRIMARY_BUTTON_COLOR_HOVERED.into();
-            }
-            Interaction::Pressed => {
-                *background_color = PRIMARY_BUTTON_COLOR_PRESSED.into();
-                let Ok(mut window) = window_query.single_mut() else {
-                    return;
-                };
+use crate::settings::resources::{GameSettings, WindowModeConfig};
 
-                match screen_mode_interaction {
-                    ScreenModeInteraction::Windowed => {
-                        window.mode = WindowMode::Windowed;
-                    }
-                    ScreenModeInteraction::Borderless => {
-                        window.mode = WindowMode::BorderlessFullscreen(MonitorSelection::Current);
-                    }
-                    ScreenModeInteraction::FullScreen => {
-                        window.mode = WindowMode::Fullscreen(
-                            MonitorSelection::Primary,
-                            VideoModeSelection::Current,
-                        );
-                    }
-                }
-            }
+pub fn load_settings() -> GameSettings {
+    let contents = fs::read_to_string("settings.toml");
+
+    match contents {
+        Ok(toml_content) => {
+            toml::from_str(&toml_content).unwrap_or_else(|_| GameSettings::default())
         }
+        Err(_) => GameSettings::default(),
     }
 }
 
-pub fn settings_navigation_interaction(
-    mut button_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<SettingsNavigationInteraction>),
-    >,
-    mut next_state: ResMut<NextState<AppState>>,
+pub fn setup_settings(mut commands: Commands) {
+    commands.insert_resource(load_settings());
+}
+
+pub fn apply_window_settings(
+    settings: Res<GameSettings>,
+    mut window_query: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    for (interaction, mut background_color) in button_query.iter_mut() {
-        match interaction {
-            Interaction::None => {
-                *background_color = PRIMARY_BUTTON_COLOR.into();
-            }
-            Interaction::Hovered => {
-                *background_color = PRIMARY_BUTTON_COLOR_HOVERED.into();
-            }
-            Interaction::Pressed => {
-                *background_color = PRIMARY_BUTTON_COLOR_PRESSED.into();
-                next_state.set(AppState::MainMenu);
-            }
+    let Ok(mut window) = window_query.single_mut() else {
+        return;
+    };
+
+    match settings.window_mode {
+        WindowModeConfig::Windowed => {
+            window.mode = WindowMode::Windowed;
+        }
+        WindowModeConfig::Borderless => {
+            window.mode = WindowMode::BorderlessFullscreen(MonitorSelection::Current);
+        }
+        WindowModeConfig::FullScreen => {
+            window.mode = WindowMode::Fullscreen(
+                MonitorSelection::Primary,
+                VideoModeSelection::Current,
+            );
         }
     }
 }

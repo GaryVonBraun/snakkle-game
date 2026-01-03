@@ -1,7 +1,6 @@
 use crate::{
     settings::{
-        components::SettingsMenu,
-        interactions::{ScreenModeInteraction, SettingsNavigationInteraction},
+        components::*,
         styling::settings_button_bundle,
     },
     styling::primary_button_bundle,
@@ -52,7 +51,7 @@ pub fn build_settings_menu(commands: &mut Commands, asset_server: &Res<AssetServ
                 })
                 .with_children(|parent| {
                     parent
-                        .spawn((settings_button_bundle(), ScreenModeInteraction::Windowed))
+                        .spawn((settings_button_bundle(), WindowModeInteraction::Windowed))
                         .with_children(|parent| {
                             parent.spawn((
                                 Text::new("Windowed".to_string()),
@@ -60,7 +59,7 @@ pub fn build_settings_menu(commands: &mut Commands, asset_server: &Res<AssetServ
                             ));
                         });
                     parent
-                        .spawn((settings_button_bundle(), ScreenModeInteraction::Borderless))
+                        .spawn((settings_button_bundle(), WindowModeInteraction::Borderless))
                         .with_children(|parent| {
                             parent.spawn((
                                 Text::new("Borderless".to_string()),
@@ -68,7 +67,7 @@ pub fn build_settings_menu(commands: &mut Commands, asset_server: &Res<AssetServ
                             ));
                         });
                     parent
-                        .spawn((settings_button_bundle(), ScreenModeInteraction::FullScreen))
+                        .spawn((settings_button_bundle(), WindowModeInteraction::FullScreen))
                         .with_children(|parent| {
                             parent.spawn((
                                 Text::new("Fullscreen".to_string()),

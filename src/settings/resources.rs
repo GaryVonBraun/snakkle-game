@@ -1,11 +1,13 @@
+use serde::{Serialize, Deserialize};
 use bevy::prelude::*;
 
-#[derive(Resource)]
-pub struct Settings {
-    pub screen_mode: ScreenMode,
+#[derive(Resource, Serialize, Deserialize)]
+pub struct GameSettings {
+    pub window_mode: WindowModeConfig,
 }
-
-pub enum ScreenMode {
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "mode", rename_all = "snake_case")]
+pub enum WindowModeConfig {
     Windowed,
     Borderless,
     FullScreen,
