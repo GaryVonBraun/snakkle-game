@@ -44,7 +44,7 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
             parent
                 .spawn((
                     primary_button_bundle(),
-                    PlayButton,
+                    MainMenuInteractions::PlayButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
@@ -56,7 +56,7 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
             parent
                 .spawn((
                     primary_button_bundle(),
-                    SettingsButton,
+                    MainMenuInteractions::SettingsButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
@@ -67,7 +67,7 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
             parent
                 .spawn((
                     primary_button_bundle(),
-                    QuitButton,
+                    MainMenuInteractions::QuitButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
