@@ -1,14 +1,17 @@
 use bevy::prelude::*;
 
 mod food;
+mod map;
 pub mod player;
 mod resources;
 mod segment;
 mod systems;
 mod ui;
-mod map;
 
-use crate::{AppState, game::{map::GameMapPlugin, ui::GameUIPlugin}};
+use crate::{
+    AppState,
+    game::{map::GameMapPlugin, ui::GameUIPlugin},
+};
 use food::FoodPlugin;
 use player::PlayerPlugin;
 use resources::*;
@@ -31,8 +34,16 @@ impl Plugin for GamePlugin {
         app.add_plugins(GameUIPlugin);
         app.add_plugins(GameMapPlugin);
         app.add_systems(OnEnter(AppState::Game), initialize_game);
-        app.add_systems(Update, tick_snake_timer.run_if(in_state(AppState::Game)).run_if(in_state(SimulationState::Running)));
-        app.add_systems(Update, toggle_simulation_state.run_if(in_state(AppState::Game)));
+        app.add_systems(
+            Update,
+            tick_snake_timer
+                .run_if(in_state(AppState::Game))
+                .run_if(in_state(SimulationState::Running)),
+        );
+        app.add_systems(
+            Update,
+            toggle_simulation_state.run_if(in_state(AppState::Game)),
+        );
     }
 }
 

@@ -7,5 +7,5 @@ pub struct SnakeTimer {
 
 #[derive(Resource)]
 pub struct GameScore {
-    pub current_score: i32
+    pub current_score: i32,
 }

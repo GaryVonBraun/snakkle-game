@@ -9,8 +9,22 @@ use crate::game::player::components::Player;
 use crate::game::resources::SnakeTimer;
 use crate::resources::Resolution;
 
-pub fn setup_segments() {
-    println!("Setting up segments");
+pub fn setup_segments(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    resolution: Res<Resolution>,
+    segment_query: Query<(&Segment, &Transform)>,
+) {
+    for _ in 0..2 {
+        spawn_segment(
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            &segment_query,
+            &resolution,
+        )
+    }
 }
 
 pub fn despawn_segments(mut commands: Commands, segment_query: Query<(Entity, &Segment)>) {
@@ -26,50 +40,29 @@ pub fn grow_new_segment(
     mut materials: ResMut<Assets<ColorMaterial>>,
     resolution: Res<Resolution>,
     segment_query: Query<(&Segment, &Transform)>,
-    player_query: Query<(&Player, &Transform)>,
 ) {
-    // previously i used player transform to spawn a segment in that location but after adding collision insta kills you
-    let Ok((_player, _player_transform)) = player_query.single() else {
-        return;
-    };
-
     for _event in m_ate_food.read() {
-        let segments: Vec<_> = segment_query.iter().collect();
-
-        let translation: Vec3;
-        match segments.last() {
-            // THIS RIGHT HERE IS COPIUM, so im spawning a segment outside of view.
-            // a better solution would maybe be spawning the segment after the player has moved, but this is simpler.
-            None => translation = Vec3 { x: 10000., y: 10000., z: 10000. },
-            Some((_segment, segment_transform)) => {
-                translation = segment_transform.translation;
-            }
-        }
-
-        commands.spawn((
-            Transform::default()
-                .with_scale(Vec3::splat(PLAYER_SIZE * resolution.pixel_ratio))
-                .with_translation(translation),
-            Mesh2d(meshes.add(Rectangle::default())),
-            MeshMaterial2d(materials.add(Color::from(GREEN))),
-            Segment {
-                index: segments.len() as i32,
-            },
-        ));
+        spawn_segment(
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            &segment_query,
+            &resolution,
+        )
     }
 }
 
 pub fn move_segments(
     mut segment_query: Query<(&Segment, &mut Transform), Without<Player>>,
     snake_timer: Res<SnakeTimer>,
-    player_query: Query<(&Player, &Transform)>,
+    player_query: Query<&Player>,
 ) {
     // if the timer is not done we just return
     if !snake_timer.timer.is_finished() {
         return;
     }
 
-    let Ok((mut _player, player_transform)) = player_query.single() else {
+    let Ok(player) = player_query.single() else {
         return;
     };
 
@@ -80,7 +73,7 @@ pub fn move_segments(
         match previous_position {
             None => {
                 previous_position = Some(segment_transform.translation);
-                segment_transform.translation = player_transform.translation;
+                segment_transform.translation = player.previous_translation;
             }
             Some(new_position) => {
                 previous_position = Some(segment_transform.translation);
@@ -88,4 +81,40 @@ pub fn move_segments(
             }
         }
     }
+}
+
+fn spawn_segment(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+    segment_query: &Query<(&Segment, &Transform)>,
+    resolution: &Res<Resolution>,
+) {
+    let segments: Vec<_> = segment_query.iter().collect();
+
+    let translation: Vec3;
+    match segments.last() {
+        // THIS RIGHT HERE IS COPIUM, so im spawning a segment outside of view.
+        // a better solution would maybe be spawning the segment after the player has moved, but this is simpler.
+        None => {
+            translation = Vec3 {
+                x: 10000.,
+                y: 10000.,
+                z: 10000.,
+            }
+        }
+        Some((_segment, segment_transform)) => {
+            translation = segment_transform.translation;
+        }
+    }
+    commands.spawn((
+        Transform::default()
+            .with_scale(Vec3::splat(PLAYER_SIZE * resolution.pixel_ratio))
+            .with_translation(translation),
+        Mesh2d(meshes.add(Rectangle::default())),
+        MeshMaterial2d(materials.add(Color::from(GREEN))),
+        Segment {
+            index: segments.len() as i32,
+        },
+    ));
 }

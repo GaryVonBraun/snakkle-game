@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub struct Player {
     pub direction: Direction,
     pub previous_direction: Direction,
+    pub previous_translation: Vec3,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]

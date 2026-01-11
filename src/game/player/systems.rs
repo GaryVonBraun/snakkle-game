@@ -25,6 +25,7 @@ pub fn setup_player(
         Player {
             direction: Direction::Down,
             previous_direction: Direction::Down,
+            previous_translation: vec3(0., 0., 0.),
         },
     ));
 }
@@ -66,6 +67,7 @@ pub fn move_player(
     };
     if snake_timer.timer.is_finished() {
         player.previous_direction = player.direction;
+        player.previous_translation = player_transform.translation;
         let move_distance: f32 = (PLAYER_SIZE + 2.) * resolution.pixel_ratio;
 
         match player.direction {
@@ -93,7 +95,7 @@ pub fn check_food_collision(
     mut m_ate_food: MessageWriter<AteFood>,
     mut commands: Commands,
 ) {
-    if !snake_timer.timer.is_finished(){
+    if !snake_timer.timer.is_finished() {
         return;
     };
     let Ok((_player, player_transform)) = player_query.single() else {
@@ -128,7 +130,7 @@ pub fn check_segment_collision(
     segment_query: Query<(&Segment, &Transform)>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
-    if !snake_timer.timer.is_finished(){
+    if !snake_timer.timer.is_finished() {
         return;
     };
 
@@ -162,19 +164,22 @@ pub fn check_border_collision(
     player_query: Query<(&Player, &Transform)>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
-    
-    if !snake_timer.timer.is_finished(){
+    if !snake_timer.timer.is_finished() {
         return;
     };
-    
+
     let Ok((_player, player_transform)) = player_query.single() else {
         return;
     };
-    
+
     let player_translation = player_transform.translation;
 
     // rudimentary collision detection
-    if player_translation.x > MAP_SIZE_POS || player_translation.x < -MAP_SIZE_NEG || player_translation.y > MAP_SIZE_POS || player_translation.y < -MAP_SIZE_NEG {
+    if player_translation.x > MAP_SIZE_POS
+        || player_translation.x < -MAP_SIZE_NEG
+        || player_translation.y > MAP_SIZE_POS
+        || player_translation.y < -MAP_SIZE_NEG
+    {
         println!("border collision detected");
         next_state.set(AppState::GameOver);
     }
