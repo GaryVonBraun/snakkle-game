@@ -7,11 +7,11 @@ use crate::{
 };
 
 use bevy::prelude::*;
-pub fn spawn_settings_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
-    build_settings_menu(&mut commands, &asset_server);
+pub fn spawn_settings_menu(mut commands: Commands) {
+    build_settings_menu(&mut commands);
 }
 
-pub fn build_settings_menu(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
+pub fn build_settings_menu(commands: &mut Commands) -> Entity {
     println!("Building settings menu");
     let main_menu_entity = commands
         .spawn((
@@ -30,14 +30,14 @@ pub fn build_settings_menu(commands: &mut Commands, asset_server: &Res<AssetServ
             // title
             parent
                 .spawn(
-                    (Node {
+                    Node {
                         width: Val::Px(300.),
                         height: Val::Px(120.),
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
                         column_gap: Val::Px(20.),
                         ..Default::default()
-                    }),
+                    },
                 )
                 .with_children(|parent| {
                     parent.spawn((Text::new("Settings".to_string()), TextColor::WHITE));
